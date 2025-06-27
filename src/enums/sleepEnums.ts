@@ -1,0 +1,11 @@
+export enum SleepStruggleDuration {
+    LESS_THAN_2_WEEKS = 'LESS_THAN_2_WEEKS',
+    TWO_TO_EIGHT_WEEKS = 'TWO_TO_EIGHT_WEEKS',
+    MORE_THAN_8_WEEKS = 'MORE_THAN_8_WEEKS',
+  }
+  
+  export enum DesiredChange {
+    GO_TO_SLEEP_EASILY = 'GO_TO_SLEEP_EASILY',
+    SLEEP_THROUGH_NIGHT = 'SLEEP_THROUGH_NIGHT',
+    WAKE_UP_REFRESHED = 'WAKE_UP_REFRESHED',
+  }

@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum SleepStruggleDuration {
+  LESS_THAN_2_WEEKS
+  TWO_TO_EIGHT_WEEKS
+  MORE_THAN_8_WEEKS
+}
+
+enum DesiredChange {
+  GO_TO_SLEEP_EASILY
+  SLEEP_THROUGH_NIGHT
+  WAKE_UP_REFRESHED
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  nickname  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  onboardingData OnboardingData?
+  userProgress   UserProgress[]
+
+  @@map("users")
+}
+
+model OnboardingData {
+  id                    String                 @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String                 @unique @db.ObjectId
+  sleepStruggleDuration SleepStruggleDuration?
+  bedTime               String?
+  wakeUpTime            String?
+  sleepHours            Int?
+  desiredChanges        DesiredChange[]
+  completed             Boolean                @default(false)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("onboarding_data")
+}
+
+model OnboardingStats {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  screen       String   @unique
+  totalVisits  Int      @default(0)
+  completions  Int      @default(0)
+  dropOffs     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("onboarding_stats")
+}
+
+model UserProgress {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  screen        String   
+  visitedAt     DateTime @default(now())
+  completedAt   DateTime? 
+  isCompleted   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, screen])
+  @@map("user_progress")
+} 
