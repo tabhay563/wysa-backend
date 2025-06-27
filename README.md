@@ -18,8 +18,7 @@ A backend service for Wysa's sleep onboarding flow with user authentication, pro
 npm install
 
 # Set up environment variables
-cp .env.example .env
-# Edit .env with your MongoDB connection string
+# Create .env file with your MongoDB connection string
 
 # Generate Prisma client
 npx prisma generate
@@ -49,6 +48,8 @@ The API will be running at `http://localhost:3000`
 
 ## Environment Variables
 
+Create a `.env` file in the root directory:
+
 ```env
 DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/database"
 JWT_SECRET="your-secret-key"
@@ -60,20 +61,11 @@ NODE_ENV=development
 
 Visit `/docs` for interactive API documentation when the server is running.
 
-## Deployment
+## Scripts
 
-### AWS EC2
-```bash
-# Upload code to EC2 instance
-chmod +x deploy-aws.sh
-./deploy-aws.sh
-```
-
-### Docker
-```bash
-docker build -t wysa-backend .
-docker run -p 3000:3000 --env-file .env wysa-backend
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
 
 ## Tech Stack
 
@@ -86,4 +78,4 @@ docker run -p 3000:3000 --env-file .env wysa-backend
 
 ## License
 
-ISC 
+ISC
