@@ -10,13 +10,31 @@ const options = {
       description: 'API documentation for the Wysa onboarding system',
     },
     servers: [
-      {
-        url: 'http://localhost:3000',
-      },
-      {
-        url: 'https://api.tabhay.tech',
-      },
+      ...(process.env.NODE_ENV === 'production' 
+        ? [
+            {
+              url: 'https://api.tabhay.tech',
+              description: 'Production server'
+            }
+          ]
+        : [
+            {
+              url: 'http://localhost:3000',
+              description: 'Development server'
+            }
+          ]
+      )
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Enter JWT token'
+        }
+      }
+    }
   },
   apis: ['src/routes/*.ts'],
 };

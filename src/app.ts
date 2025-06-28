@@ -15,18 +15,21 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({
-  origin: [
-    'https://wysa-frontend-rouge.vercel.app',
-    'https://api.tabhay.tech',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:5173'
-  ],
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? [
+        'https://wysa-frontend-rouge.vercel.app',
+        'https://api.tabhay.tech'
+      ]
+    : true, 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,12 +43,7 @@ app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/user', userRoutes);
 
-app.use('/docs', cors({
-  origin: true, 
-  credentials: false,
-  methods: ['GET', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}), swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.get('/health', (req, res) => {
   res.json({ 
