@@ -1,8 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import swaggerUi from 'swagger-ui-express';
-import { specs } from './utils/swagger';
+import { setupSwagger } from './utils/swagger';
 import { errorHandler } from './utils/errorHandler';
 import logger from './utils/logger';
 import authRoutes from './routes/authRoutes';
@@ -43,7 +42,7 @@ app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/user', userRoutes);
 
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
+setupSwagger(app);
 
 app.get('/health', (req, res) => {
   res.json({ 

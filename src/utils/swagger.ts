@@ -10,20 +10,14 @@ const options = {
       description: 'API documentation for the Wysa onboarding system',
     },
     servers: [
-      ...(process.env.NODE_ENV === 'production' 
-        ? [
-            {
-              url: 'https://api.tabhay.tech',
-              description: 'Production server'
-            }
-          ]
-        : [
-            {
-              url: 'http://localhost:3000',
-              description: 'Development server'
-            }
-          ]
-      )
+      {
+        url: 'https://api.tabhay.tech',
+        description: 'Production server'
+      },
+      {
+        url: 'http://localhost:3000',
+        description: 'Development server'
+      }
     ],
     components: {
       securitySchemes: {
@@ -40,6 +34,23 @@ const options = {
 };
 
 export const specs = swaggerJsdoc(options);
+
 export const setupSwagger = (app: any) => {
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    swaggerOptions: {
+      // This will make Swagger use the current domain
+      url: undefined, // Let Swagger auto-detect
+      // Show the production server first when on production domain
+      servers: [
+        {
+          url: 'https://api.tabhay.tech',
+          description: 'Production server'
+        },
+        {
+          url: 'http://localhost:3000',
+          description: 'Development server'
+        }
+      ]
+    }
+  }));
 };
