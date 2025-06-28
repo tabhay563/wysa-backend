@@ -1,6 +1,13 @@
 import prisma from '../config/prisma';
 import logger from '../utils/logger';
 
+interface FilterOptions {
+  nickname?: string;
+  userId?: string;
+  screen?: string;
+  status?: string;
+}
+
 class StatsService {
   static async getUnifiedAnalytics() {
     try {
@@ -27,6 +34,85 @@ class StatsService {
       logger.error('Analytics fetch failed:', err);
       throw new Error('Failed to get analytics');
     }
+  }
+
+  static async getFilteredAnalytics(filters: FilterOptions) {
+    try {
+      logger.info('Applying filters:', filters);
+      
+      const [allUsers, screenStats] = await Promise.all([
+        this.getFilteredUsers(filters),
+        this.getScreenStats()
+      ]);
+
+      const completed = allUsers.filter(u => u.onboardingData?.completed);
+      const droppedOff = allUsers.filter(u => !u.onboardingData?.completed);
+
+      // Apply screen filter if specified
+      let filteredScreenStats = screenStats;
+      if (filters.screen) {
+        filteredScreenStats = screenStats.filter(s => s.screen === filters.screen);
+      }
+
+      return {
+        success: true,
+        data: {
+          summary: this.buildSummary(allUsers, completed, filteredScreenStats),
+          completedUsers: this.formatCompletedUsers(completed),
+          droppedOffUsers: this.formatDroppedUsers(droppedOff),
+          screenAnalytics: this.buildScreenAnalytics(allUsers, filteredScreenStats),
+          funnel: this.buildFunnel(filteredScreenStats),
+          totalMatches: allUsers.length
+        },
+        appliedFilters: filters,
+        timestamp: new Date().toISOString()
+      };
+    } catch (err) {
+      logger.error('Filtered analytics fetch failed:', err);
+      throw new Error('Failed to get filtered analytics');
+    }
+  }
+
+  static async getFilteredUsers(filters: FilterOptions) {
+    const whereClause: any = {};
+    
+    // Text search for nickname (case-insensitive partial match)
+    if (filters.nickname) {
+      whereClause.nickname = {
+        contains: filters.nickname,
+        mode: 'insensitive'
+      };
+    }
+    
+    // Exact match for userId
+    if (filters.userId) {
+      whereClause.id = filters.userId;
+    }
+    
+    // Status filter (completed/incomplete)
+    if (filters.status) {
+      if (filters.status === 'completed') {
+        whereClause.onboardingData = {
+          completed: true
+        };
+      } else if (filters.status === 'incomplete') {
+        whereClause.OR = [
+          { onboardingData: null },
+          { onboardingData: { completed: false } }
+        ];
+      }
+    }
+
+    return await prisma.user.findMany({
+      where: whereClause,
+      include: {
+        onboardingData: true,
+        userProgress: {
+          orderBy: { visitedAt: 'asc' }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
   }
 
   static async getAllUsers() {
