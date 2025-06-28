@@ -13,6 +13,9 @@ const options = {
       {
         url: 'http://localhost:3000',
       },
+      {
+        url: 'https://api.tabhay.tech',
+      },
     ],
   },
   apis: ['src/routes/*.ts'],

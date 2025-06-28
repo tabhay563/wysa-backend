@@ -5,23 +5,20 @@ import swaggerUi from 'swagger-ui-express';
 import { specs } from './utils/swagger';
 import { errorHandler } from './utils/errorHandler';
 import logger from './utils/logger';
-
-
 import authRoutes from './routes/authRoutes';
 import onboardingRoutes from './routes/onboardingRoutes';
 import statsRoutes from './routes/statsRoutes';
 import userRoutes from './routes/userRoutes';
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors({
   origin: [
     'https://wysa-frontend-rouge.vercel.app',
+    'https://api.tabhay.tech',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:5173'
@@ -43,8 +40,13 @@ app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/user', userRoutes);
 
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/docs', cors({
+  origin: true, 
+  credentials: false,
+  methods: ['GET', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}), swaggerUi.serve, swaggerUi.setup(specs));
+
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
