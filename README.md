@@ -2,6 +2,9 @@
 
 A backend service for Wysa's sleep onboarding flow with user authentication, progress tracking, and analytics.
 
+## Backedn Swagger Url
+url := https://api.tabhay.tech/docs/
+
 ## Features
 
 - User signup/login with JWT authentication
